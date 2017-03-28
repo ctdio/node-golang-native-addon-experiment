@@ -1,5 +1,5 @@
 #include <node.h>
-#include "./lib/libgo.h"
+#include "lib/libgo.h"
 
 using v8::FunctionCallbackInfo;
 using v8::Isolate;

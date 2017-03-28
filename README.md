@@ -37,7 +37,7 @@ also export a `libgo.h` file, which we will need.
 
 ```bash
 # in the lib directory
-go build -buildmode=c-archive -o libgo.a
+$ go build -buildmode=c-archive -o libgo.a
 ```
 
 We build with the `c-archive` build mode because it links the library at compile time. Another option would be
@@ -54,7 +54,7 @@ Now, lets create the native code that will bridge our Go and Javascript.
 ```c++
 #include <node.h>
 // include the header file generated from the Go build
-#include "./lib/libgo.h"
+#include "lib/libgo.h"
 
 using v8::FunctionCallbackInfo;
 using v8::Isolate;
@@ -108,10 +108,10 @@ that `node` can use.
 
 ```bash
 # Generate appropriate build files for platform
-node-gyp configure
+$ node-gyp configure
 
 # build the project to create our bindings file
-node-gyp build
+$ node-gyp build
 ```
 
 After this, you should see that that a `build` directory was created. If you take a peek into the directory,
@@ -126,17 +126,18 @@ const goAddon = require('./build/Release/go-addon');
 console.log(goAddon.hello());
 ```
 
-Now, we can run our script and see it output "Hello world!".
+Now, we can run our script and see it output the string that our Go function returned.
 
 ```bash
-node index.js
+$ node index.js
+Hello world!
 ```
 
 If you want to see in action, but don't want to go through the trouble of running the commands, you can run the
 provided `run-build.sh` script to get everything working.
 
 ```bash
-./run-build.sh
+$ ./run-build.sh
 ```
 
 
