@@ -4,7 +4,7 @@ import "C"
 
 //export Hello
 func Hello () *C.char {
-  return C.CString("Hello World")
+  return C.CString("Hello world!")
 }
 
 // required to build
