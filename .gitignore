@@ -1,1 +1,4 @@
 build
+lib/libgo.a
+lib/libgo.so
+lib/libgo.h

@@ -8,7 +8,7 @@ using v8::Object;
 using v8::String;
 using v8::Value;
 
-void Method(const v8::FunctionCallbackInfo<Value> &args) {
+void HelloMethod(const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
   char *c = Hello();
   args.GetReturnValue().Set(String::NewFromUtf8(isolate, c));
@@ -16,7 +16,7 @@ void Method(const v8::FunctionCallbackInfo<Value> &args) {
 }
 
 void init(Local<Object> exports) {
-  NODE_SET_METHOD(exports, "hello", Method);
+  NODE_SET_METHOD(exports, "hello", HelloMethod);
 }
 
 NODE_MODULE(myGoAddon, init)
