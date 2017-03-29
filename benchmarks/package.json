@@ -1,0 +1,17 @@
+{
+  "name": "node-golang-native-modules-benchmarks",
+  "version": "1.0.0",
+  "description": "",
+  "main": "benchmark.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "benchmark"
+  ],
+  "author": "Charlie Duong",
+  "license": "MIT",
+  "dependencies": {
+    "benchmark": "^2.1.4"
+  }
+}

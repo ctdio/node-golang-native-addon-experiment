@@ -133,12 +133,203 @@ $ node index.js
 Hello world!
 ```
 
-If you want to see in action, but don't want to go through the trouble of running the commands, you can run the
-provided `run-build.sh` script to get everything working.
+If you want to see in action, but don't want to go through the trouble of running the commands, you `cd` into the
+`helloworld` and run the provided `run-build.sh` script to get a working build.
 
 ```bash
 $ ./run-build.sh
 ```
 
+### Benchmarks
 
+It is well known that there is quite a bit of overhead when switching context between Go and C with `cgo`, but
+is it enough deter devs from writing native modules with Go?
 
+To start let's try running some benchmarks to see if the overhead has noticable effect on performance.
+
+First, we will start with a simple test to see if there is much of a difference when it comes to invoking simple
+functions. Here are the functions that were invoked in each language for the test:
+
+```js
+function jsAdd (a, b) {
+  return a + b;
+}
+```
+
+```c++
+void CppAdd(const FunctionCallbackInfo<Value> &args) {
+  Isolate *isolate = args.GetIsolate();
+  //validateArgs(isolate, args);
+
+  double sum = args[0]->NumberValue() + args[1]->NumberValue();
+  Local<Number> value = Number::New(isolate, sum);
+  args.GetReturnValue().Set(value);
+}
+```
+
+```go
+//export Add
+func Add (a, b float64) float64 {
+  return a + b
+}
+```
+
+let's not forget the glue that is needed for the Go function to be invoked.
+
+```c++
+// glue for the Go bindings
+void GoAdd(const FunctionCallbackInfo<Value> &args) {
+  Isolate *isolate = args.GetIsolate();
+  //validateArgs(isolate, args);
+
+  GoFloat64 sum = Add(args[0]->NumberValue(), args[1]->NumberValue());
+  Local<Number> value = Number::New(isolate, sum);
+  args.GetReturnValue().Set(value);
+}
+```
+
+Running these with `benchmark`, we get the following results:
+
+```
+js add x 91,215,401 ops/sec ±2.72% (85 runs sampled)
+cpp add x 29,007,733 ops/sec ±3.02% (84 runs sampled)
+go add x 376,173 ops/sec ±1.04% (89 runs sampled)
+```
+
+As expected, the Javascript implementation comes out on top with the most ops/sec.
+The C++ implementation is quite slower, which is to be expected since there is some overhead
+when switching contexts. The Go implementation ends up with a staggeringly low
+376,173 ops/sec. Even with the small amount of code needed to invoke the Go function from
+the C++ code, this is much slower than expected. Nonetheless, this is still quite slow.
+
+Next, let's try some simple looping. In this test, we will increment and set a variable for every
+iteration of the loop. We will also log the amount of time that it takes to go through the loop
+to get an idea of how much time is spent in each function.
+
+```js
+function jsIncrement () {
+  let startDate = Date.now();
+  let v = 0
+
+  for (let i = 0; i < 2147483600; i++) {
+    v = i
+  }
+
+  console.log(`js: Time in ms to complete loop ${Date.now() - startDate} ms`);
+  return v
+}
+```
+
+```c++
+void CppIncrement(const FunctionCallbackInfo<Value> &args) {
+  Isolate *isolate = args.GetIsolate();
+  high_resolution_clock::time_point start = high_resolution_clock::now();
+
+  int value = 0;
+
+  for (int i = 0; i < 2147483600; i++) {
+    value = i;
+  }
+
+  high_resolution_clock::time_point end = high_resolution_clock::now();
+
+  auto diff = duration_cast<milliseconds>(end - start);
+
+  cout << "cpp: Time in ms to complete loop " << diff.count() << "ms\n";
+
+  args.GetReturnValue().Set(Number::New(isolate, value));
+}
+```
+
+```go
+//export Increment
+func Increment () int {
+  start := getTimestamp()
+  v := 0
+
+  for i := 0; i < 2147483600; i++ {
+    v = i
+  }
+
+  fmt.Printf("go: Time in ms to complete loop %v ms\n", getTimestamp() - start)
+  return v
+}
+```
+
+Some more glue:
+
+```c++
+void GoIncrement(const FunctionCallbackInfo<Value> &args) {
+  Isolate *isolate = args.GetIsolate();
+
+  args.GetReturnValue().Set(Number::New(isolate, Increment()));
+}
+```
+
+Now the results:
+
+```
+js: Time in ms to complete loop 4270 ms
+js: Time in ms to complete loop 5339 ms
+js: Time in ms to complete loop 4965 ms
+js: Time in ms to complete loop 4931 ms
+js: Time in ms to complete loop 4973 ms
+js: Time in ms to complete loop 4933 ms
+js: Time in ms to complete loop 4909 ms
+js: Time in ms to complete loop 4913 ms
+js: Time in ms to complete loop 4947 ms
+js: Time in ms to complete loop 4940 ms
+js increment x 0.20 ops/sec ±4.54% (5 runs sampled)
+cpp: Time in ms to complete loop 934ms
+cpp: Time in ms to complete loop 932ms
+cpp: Time in ms to complete loop 938ms
+cpp: Time in ms to complete loop 932ms
+cpp: Time in ms to complete loop 939ms
+cpp: Time in ms to complete loop 949ms
+cpp: Time in ms to complete loop 918ms
+cpp: Time in ms to complete loop 955ms
+cpp: Time in ms to complete loop 922ms
+cpp: Time in ms to complete loop 935ms
+cpp: Time in ms to complete loop 939ms
+cpp: Time in ms to complete loop 918ms
+cpp: Time in ms to complete loop 928ms
+cpp: Time in ms to complete loop 925ms
+cpp increment x 1.07 ops/sec ±1.29% (7 runs sampled)
+go: Time in ms to complete loop 970 ms
+go: Time in ms to complete loop 968 ms
+go: Time in ms to complete loop 970 ms
+go: Time in ms to complete loop 953 ms
+go: Time in ms to complete loop 982 ms
+go: Time in ms to complete loop 957 ms
+go: Time in ms to complete loop 959 ms
+go: Time in ms to complete loop 968 ms
+go: Time in ms to complete loop 971 ms
+go: Time in ms to complete loop 956 ms
+go: Time in ms to complete loop 948 ms
+go: Time in ms to complete loop 965 ms
+go: Time in ms to complete loop 973 ms
+go: Time in ms to complete loop 986 ms
+go increment x 1.04 ops/sec ±1.08% (7 runs sampled)
+Fastest is cpp increment
+```
+
+In this test, there were very few function calls being made. As you can see, the Javascript
+for loop was quite slow, taking about 5 seconds to complete. We know that heavy, blocking
+computations like this shouldn't really be with Javascript anyway, so this isn't a huge
+surprise. The interesting thing is that both the Go and C++ functions are almost neck and neck,
+with the C++ implementation having a slight lead over Go. Both are a little over 5 times faster
+than their JS variant. Maybe using Go for heavy processing can be somewhat feasible? I think more
+exploring should be done before a solid conclusion can be made.
+
+**Note:** Both of the above benchmarks test some extreme cases and are not really representative
+of what you would see in the wild. Some more interesting tests (especially some involving goroutines)
+would be helpful in determining whether Go can be a decent alternative to straight C++ for native modules.
+
+Also, the machine I used for running these benchmarks is a 2016 Macbook Pro with a 2.7 GHz i7 and 16GB of RAM.
+
+If you want to try running the benchmarks on your own, `cd` into the `benchmark` dir and run the `run-build.sh` script.
+Then run `node benchmark.js` to start the tests.
+
+### Todo:
+- Add more benchmarks
+- Introduce more realistic examples
