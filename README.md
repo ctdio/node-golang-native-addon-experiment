@@ -133,8 +133,8 @@ $ node index.js
 Hello world!
 ```
 
-If you want to see in action, but don't want to go through the trouble of running the commands, you `cd` into the
-`helloworld` and run the provided `run-build.sh` script to get a working build.
+If you want to see in action, but don't want to go through the trouble of running the commands, you can `cd` into the
+`helloworld` directory and run the provided `run-build.sh` script to get a working build.
 
 ```bash
 $ ./run-build.sh
@@ -200,7 +200,9 @@ As expected, the Javascript implementation comes out on top with the most ops/se
 The C++ implementation is quite slower, which is to be expected since there is some overhead
 when switching contexts. The Go implementation ends up with a staggeringly low
 376,173 ops/sec. Even with the small amount of code needed to invoke the Go function from
-the C++ code, this is much slower than expected. Nonetheless, this is still quite slow.
+the C++ code, this is much slower than expected. It looks like there is a decent amount of
+overhead when invoking Go functions from within C++, so Go might not be the best option
+for relatively hot code.
 
 Next, let's try some simple looping. In this test, we will increment and set a variable for every
 iteration of the loop. We will also log the amount of time that it takes to go through the loop
