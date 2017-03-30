@@ -63,7 +63,7 @@ using v8::Object;
 using v8::String;
 using v8::Value;
 
-void HelloMethod(const FunctionCallbackInfo<Value> &args) {
+void HelloMethod (const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
   // Call exported Go function, which returns a C string
   char *c = Hello();
@@ -73,7 +73,7 @@ void HelloMethod(const FunctionCallbackInfo<Value> &args) {
 }
 
 // add method to exports
-void init(Local<Object> exports) {
+void Init (Local<Object> exports) {
   NODE_SET_METHOD(exports, "hello", HelloMethod);
 }
 
@@ -157,7 +157,7 @@ function jsAdd (a, b) {
 ```
 
 ```c++
-void CppAdd(const FunctionCallbackInfo<Value> &args) {
+void CppAdd (const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
   //validateArgs(isolate, args);
 
@@ -178,7 +178,7 @@ let's not forget the glue that is needed for the Go function to be invoked.
 
 ```c++
 // glue for the Go bindings
-void GoAdd(const FunctionCallbackInfo<Value> &args) {
+void GoAdd (const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
   //validateArgs(isolate, args);
 
@@ -223,7 +223,7 @@ function jsIncrement () {
 ```
 
 ```c++
-void CppIncrement(const FunctionCallbackInfo<Value> &args) {
+void CppIncrement (const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
   high_resolution_clock::time_point start = high_resolution_clock::now();
 
@@ -261,7 +261,7 @@ func Increment () int {
 Some more glue:
 
 ```c++
-void GoIncrement(const FunctionCallbackInfo<Value> &args) {
+void GoIncrement (const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
 
   args.GetReturnValue().Set(Number::New(isolate, Increment()));

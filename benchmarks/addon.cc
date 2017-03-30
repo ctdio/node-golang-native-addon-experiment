@@ -23,7 +23,7 @@ bool validateArgs (Isolate *isolate, const FunctionCallbackInfo<Value> &args) {
   return true;
 }
 
-void CppAdd(const FunctionCallbackInfo<Value> &args) {
+void CppAdd (const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
   bool valid = validateArgs(isolate, args);
   if (!valid) {
@@ -36,7 +36,7 @@ void CppAdd(const FunctionCallbackInfo<Value> &args) {
   args.GetReturnValue().Set(value);
 }
 
-void GoAdd(const FunctionCallbackInfo<Value> &args) {
+void GoAdd (const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
   bool valid = validateArgs(isolate, args);
   if (!valid) {
@@ -49,7 +49,7 @@ void GoAdd(const FunctionCallbackInfo<Value> &args) {
   args.GetReturnValue().Set(value);
 }
 
-void CppIncrement(const FunctionCallbackInfo<Value> &args) {
+void CppIncrement (const FunctionCallbackInfo<Value> &args) {
 
   Isolate *isolate = args.GetIsolate();
   high_resolution_clock::time_point start = high_resolution_clock::now();
@@ -69,17 +69,17 @@ void CppIncrement(const FunctionCallbackInfo<Value> &args) {
   args.GetReturnValue().Set(Number::New(isolate, value));
 }
 
-void GoIncrement(const FunctionCallbackInfo<Value> &args) {
+void GoIncrement (const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
 
   args.GetReturnValue().Set(Number::New(isolate, Increment()));
 }
 
-void init(Local<Object> exports) {
+void Init (Local<Object> exports) {
   NODE_SET_METHOD(exports, "cppAdd", CppAdd);
   NODE_SET_METHOD(exports, "goAdd", GoAdd);
   NODE_SET_METHOD(exports, "cppIncrement", CppIncrement);
   NODE_SET_METHOD(exports, "goIncrement", GoIncrement);
 }
 
-NODE_MODULE(addon, init)
+NODE_MODULE(addon, Init)
