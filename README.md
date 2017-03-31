@@ -159,7 +159,11 @@ function jsAdd (a, b) {
 ```c++
 void CppAdd (const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  //validateArgs(isolate, args);
+  bool valid = validateArgs(isolate, args);
+  if (!valid) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong args")));
+    return;
+  }
 
   double sum = args[0]->NumberValue() + args[1]->NumberValue();
   Local<Number> value = Number::New(isolate, sum);
@@ -180,7 +184,11 @@ let's not forget the glue that is needed for the Go function to be invoked.
 // glue for the Go bindings
 void GoAdd (const FunctionCallbackInfo<Value> &args) {
   Isolate *isolate = args.GetIsolate();
-  //validateArgs(isolate, args);
+  bool valid = validateArgs(isolate, args);
+  if (!valid) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Wrong args")));
+    return;
+  }
 
   GoFloat64 sum = Add(args[0]->NumberValue(), args[1]->NumberValue());
   Local<Number> value = Number::New(isolate, sum);
@@ -317,11 +325,11 @@ Fastest is cpp increment
 
 In this test, there were very few function calls being made. As you can see, the Javascript
 for loop was quite slow, taking about 5 seconds to complete. We know that heavy, blocking
-computations like this shouldn't really be with Javascript anyway, so this isn't a huge
-surprise. The interesting thing is that both the Go and C++ functions are almost neck and neck,
-with the C++ implementation having a slight lead over Go. Both are a little over 5 times faster
-than their JS variant. Maybe using Go for heavy processing can be somewhat feasible? I think more
-exploring should be done before a solid conclusion can be made.
+computations like this shouldn't really be done with Javascript anyway, so this isn't a huge
+surprise. The interesting thing is that both the Go and C++ functions are almost neck and neck in
+terms of speed, with the C++ implementation having a slight lead over Go. Both are a little over 5
+times faster than the JS variant. Maybe using Go for heavy processing can be somewhat feasible?
+I think more exploring should be done before a solid conclusion can be made.
 
 **Note:** Both of the above benchmarks test some extreme cases and are not really representative
 of what you would see in the wild. Some more interesting tests (especially some involving goroutines)
