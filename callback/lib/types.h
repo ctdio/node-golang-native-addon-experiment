@@ -2,7 +2,7 @@
 #define SHARED_TYPES_H
 
 typedef struct go_args {
-  int num;
+  float num;
 } GoArgs;
 
 #endif

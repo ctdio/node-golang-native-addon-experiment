@@ -1,5 +1,6 @@
 #include <node.h>
 #include <nan.h>
+#include <iostream>
 #include "lib/libgo.h"
 #include "lib/types.h"
 
@@ -18,15 +19,18 @@ using Nan::FunctionCallbackInfo;
 class MyWorker : public AsyncWorker {
 public:
   // constructor
-  MyWorker (GoArgs *args, Callback *callback) :
+  MyWorker (GoArgs args, Callback *callback) :
     AsyncWorker(callback),
     args(args) {}
 
   // destructor
-  ~MyWorker () {}
+  ~MyWorker () {
+    delete callback;
+    callback = 0;
+  }
 
   void Execute () {
-    result = doSomething(*args);
+    result = doSomething(args);
   }
 
   void HandleOKCallback () {
@@ -41,7 +45,7 @@ public:
     callback->Call(2, callbackRes);
   }
 private:
-  GoArgs *args;
+  GoArgs args;
   GoArgs result;
 };
 
@@ -49,18 +53,18 @@ void DoSomethingAsync (const FunctionCallbackInfo<Value> &info) {
   Local<Object> obj = info[0]->ToObject();
   Callback *callback = new Callback(info[1].As<v8::Function>());
 
-  auto value = Nan::Get(obj, Nan::New<String>("num").ToLocalChecked()).ToLocalChecked();
-  Maybe<double> dVal = Nan::To<double>(value);
+  Local<Value> value = Nan::Get(obj, Nan::New<String>("num").ToLocalChecked()).ToLocalChecked();
 
-  if (dVal.IsNothing()) {
+  if (!value->IsNumber()) {
     // if nothing, invoke callback with error
-    Local<Value> err = Nan::Error("Value for 'num' must be supplied");
+    Local<Value> err = Nan::Error("A number value for 'num' must be supplied");
     Local<Value> callbackRes[] = { err };
     callback->Call(1, callbackRes);
   } else {
     // otherwise perform work
-    GoArgs *args = new GoArgs();
-    args->num = dVal.FromJust();
+    GoArgs args;
+    args.num = value->NumberValue();
+    std::cout << args.num << " is the value\n";
     AsyncQueueWorker(new MyWorker(args, callback));
   }
 }

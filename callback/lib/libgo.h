@@ -5,7 +5,7 @@
 /* Start of preamble from import "C" comments.  */
 
 
-#line 3 "/Users/charlieduong/Documents/home/projects/open-source/gyp-test/callback/lib/imports.go"
+#line 3 "/Users/charlieduong/Documents/home/projects/open-source/gyp-test/callback/lib/main.go"
  #include "types.h"
 
 #line 1 "cgo-generated-wrapper"

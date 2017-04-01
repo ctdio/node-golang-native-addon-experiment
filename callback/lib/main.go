@@ -10,16 +10,14 @@ func doSomething (args C.struct_go_args) C.struct_go_args {
   fmt.Println("here is the object", args)
 
   resultNum := 0
-
   channel := make(chan int)
-
   totalValues := 25
 
   // kick off a bunch of goroutines
   for i := 0; i < totalValues; i++ {
     index := i
     go func () {
-      time.Sleep(time.Duration(i % 10) * time.Second)
+      time.Sleep(time.Duration(index % 2) * time.Second)
       channel <- i
     }()
   }
@@ -37,7 +35,7 @@ func doSomething (args C.struct_go_args) C.struct_go_args {
 
   // put the resulting data into a c struct and return it
   var result C.struct_go_args
-  result.num = C.int(resultNum)
+  result.num = C.float(resultNum) + args.num
   return result
 }
 

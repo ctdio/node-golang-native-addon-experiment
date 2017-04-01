@@ -1,8 +1,7 @@
 const addon = require('./build/Release/addon')
 
-
 const testObject = {
-  num: 1
+  num: 1.243
 }
 
 addon.doSomethingAsync(testObject, function (error, res) {
