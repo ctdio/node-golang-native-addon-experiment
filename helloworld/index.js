@@ -1,3 +1,3 @@
-const goAddon = require('./build/Release/go-addon');
+const goAddon = require('./build/Release/go-addon')
 
-console.log(goAddon.hello());
+console.log(goAddon.hello())

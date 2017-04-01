@@ -1,0 +1,16 @@
+{
+  "name": "golang-callback",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "node-gyp rebuild"
+  },
+  "author": "Charlie Duong",
+  "license": "MIT",
+  "gypfile": true,
+  "dependencies": {
+    "nan": "^2.5.1"
+  }
+}
