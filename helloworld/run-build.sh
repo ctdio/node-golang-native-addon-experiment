@@ -1,8 +1,6 @@
 #!/bin/bash
 
-#export DYLD_FALLBACK_LIBRARY_PATH="$PWD/lib/:$DYLD_FALLBACK_LIBRARY_PATH";
-
-#echo $DYLD_FALLBACK_LIBRARY_PATH
+set -e
 
 pushd lib
 
