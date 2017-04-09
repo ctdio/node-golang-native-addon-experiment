@@ -1,6 +1,6 @@
-# async callback example
+# Promise example
 
-This example shows how Go can be used to perform the bulk of whatever operation
+This another example that shows how Go can be used to perform the bulk of whatever operation
 you plan on performing needs to be performed asynchronously.
 
 In this example, we use `cgo` to share a struct between Go and C++. The struct's definition is
